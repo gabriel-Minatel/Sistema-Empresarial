@@ -755,6 +755,7 @@ void RelatorioVenda() {
         imprimirData(V.DataVenda);
 
         // cabeçalho dos itens (uma vez por venda)
+        cout << "\n ";
         cout << "\n     " << left << setw(8) << "Código"
              << left  << setw(30) << "Descrição"
              << right << setw(6)  << "Qtd"
@@ -803,6 +804,7 @@ long int ConsultaVenda(int cod) {
 void PesquisaVenda() {
 	int buscaCod, result;
 	RegVenda V;
+	RegItem itens;
 	
 	cout << "\n*** PESQUISAR VENDA ***";
 	cout << "\n-----------------------\n";
@@ -816,16 +818,37 @@ void PesquisaVenda() {
 		fseek(ArqVendas, result, SEEK_SET);
 		fread(&V, sizeof(V), 1, ArqVendas);
 		fclose(ArqVendas);
+		
 		cout << "\n --------------------------------------";
         cout << "\n  *** INFORMAÇÕES DA VENDA ***";
         cout << "\n --------------------------------------";
         cout << "\n  Nº Nota : " << V.NumeroNota;
         cout << "\n  Nome do Cliente (ou Mesa) : " << V.clienteNome;
         cout << "\n  Qtd. Itens Vendidos : " << V.totalItens;
-        cout << "\n  Preço Total da Nota : " << V.totalNota;
+        cout << "\n  Preço Total da Nota : " << fixed << setprecision(2) << V.totalNota;
         cout << "\n  Forma de Pagamento : " << V.formaPagamento;
 		cout << "\n  Data  e  Horas : "; imprimirData(V.DataVenda);
+        cout << "\n --------------------------------------\n";
+    	
+		cout << "\n --------------------------------------";
+        cout << "\n  *** INFORMAÇÕES DOS ITENS ***";
         cout << "\n --------------------------------------";
+		
+		ArqItens = fopen("Itens.dat", "rb");
+		fseek(ArqItens, result, SEEK_SET);
+		fread(&itens, sizeof(itens), 1, ArqItens);
+
+		rewind(ArqItens);
+        while(fread(&itens, sizeof(itens), 1, ArqItens) == 1) {
+            if(itens.NumeroNota == V.NumeroNota) {
+                cout << "\n  Código do Produto : " << itens.CodigoItem;
+		        cout << "\n  Descrição : " << itens.DescricaoItem;
+		        cout << "\n  Preço Unitário : " << fixed << setprecision(2) << itens.PrecoUnitario;
+		        cout << "\n  Qtd. Vendida : " << itens.QtdVendida;
+		        cout << "\n --------------------------------------";
+            }
+        }
+		fclose(ArqItens);
 	}
 }
 

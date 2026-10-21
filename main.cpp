@@ -7,7 +7,6 @@
 #include <time.h>
 #include <cstring>
 #include <string> 
-#include <windows.h>
 
 using namespace std;
 
@@ -70,9 +69,13 @@ void BaixaEstoque(long int pos, int qtd);
 void RelatorioVenda();
 void PesquisaVenda();
 long int ConsultaVenda(int cod);
+long int ConsultaItem(int cod);
 void MenuEdicaoVenda();
 void EditarVenda(int pos);
 void EditarItem(long int numNota, long int posVenda);
+void MenuExclusaoVenda();
+long int ExcluirVenda(int numNota);
+long int ExcluirItem(int numNota, int codItem);
 
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "Portuguese");
@@ -563,6 +566,7 @@ void MenuVendas() {
         cout << "\n 3 - Pesquisar Venda Feita";
         cout << "\n 4 - Editar Venda";
         cout << "\n 5 - Excluir Venda";
+        cout << "\n 6 - Trancar Venda";
         cout << "\n 0 - Retornar ao Menu Principal";
         cout << "\n\n - Escolha a opção: ";
         cin >> opcao;
@@ -578,9 +582,13 @@ void MenuVendas() {
                     pausa();
                     break;  
             case 4: MenuEdicaoVenda();
-                    break;/*
+                    break;
             case 5: MenuExclusaoVenda();
-                    break;*/
+                    break;/*
+			case 6: 
+					MenuTrancarVenda();
+					break;
+					*/
             default: cout << "\n Tecle <Enter> para retornar ao menu principal "; system("pause>>null");
                     break;
         }
@@ -793,7 +801,7 @@ long int ConsultaVenda(int cod) {
 	ArqVendas = fopen("Vendas.dat", "rb");
 	RegVenda aux;
 	if(ArqVendas == NULL) {
-		cout << "Erron na abertura do arquivo \n";
+		cout << "Erro na abertura do arquivo \n";
 		pausa();
 		exit(1);
 	} 
@@ -805,6 +813,26 @@ long int ConsultaVenda(int cod) {
 		}
 	} 
 	fclose(ArqVendas);
+	return -1;
+}
+
+long int ConsultaItem(int cod) {
+	system("cls");
+	ArqItens = fopen("Itens.dat", "rb");
+	RegItem aux;
+	if(ArqItens == NULL) {
+		cout << "Erro na abertura do arquivo \n";
+		pausa();
+		exit(1);
+	} 
+	while(fread(&aux, sizeof(aux), 1, ArqItens) == 1) {
+		if(aux.CodigoItem == cod) {
+			long int pos = ftell(ArqItens) - (long)sizeof(aux);
+			fclose(ArqItens);
+			return pos;
+		}
+	} 
+	fclose(ArqItens);
 	return -1;
 }
 
@@ -983,6 +1011,212 @@ void EditarVenda(int pos) {
 	system("cls");
 }
 
+void MenuExclusaoVenda() {
+	system("cls");
+	int opcaoE, posicao, posicaoS, opcaoExcluir, escolha, escolhaS;
+    char excluir;
+	
+	do {
+		cout << "\n -----------------------------------------\n";
+        cout << "           *** MENU DE EXCLUSÃO ***";
+        cout << "\n -----------------------------------------\n";
+        cout << "\n1) Deseja Excluir a Venda Inteira;      ";
+		cout << "\n2) Deseja Excluir um Item da Venda;     ";
+        cout << "\n0) Para retornar ao Menu Principal...   ";
+        cout << "\n- Digite sua escolha: ";
+        cin >> opcaoE;
+        while((opcaoE < 0) || (opcaoE > 2)) {
+            cout << "\nEscolha inválida! Digite Novamente";
+            cin >> opcaoE;
+        }
+		if(opcaoE == 1) {
+			RelatorioVenda();
+			
+			cout << "\n";
+			cout << "\n -----------------------------------------\n";
+        	cout << "           *** EXCLUSÃO DE VENDA ***";
+        	cout << "\n -----------------------------------------\n";
+			cout << "\n- Para sair: Digite = 0 ";
+			cout << "\n- Informe o Nº da Nota: ";
+			cin >> escolha;
+			while(escolha < 0) {
+				cout << "\nEscolha inválida! Digite novamente: ";
+				cin >> escolha;
+			}
+			posicao = ConsultaVenda(escolha);
+			
+			if(posicao == -1) {
+				cout << "\n Venda não cadastrado ou Nº Nota não existe";
+                pausa();
+			} else {
+				system("cls");
+				RegVenda V;
+				
+				ArqVendas = fopen("Vendas.dat", "rb");
+				fseek(ArqVendas, posicao, SEEK_SET);
+				fread(&V, sizeof(V), 1, ArqVendas);
+				fclose(ArqVendas);
+				cout << "\n --------------------------------------";
+                cout << "\n  *** INFORMAÇÕES DA	VENDA ***";
+                cout << "\n --------------------------------------";
+                cout << "\n  Nº Nota            : " << V.NumeroNota;
+                cout << "\n  (Nome ou Mesa)     : " << V.clienteNome;
+                cout << "\n  Forma de Pagamento : " << V.formaPagamento;
+                cout << "\n  Qtd. Vendida       : " << V.totalItens;
+                cout << "\n  Preço da Venda     : " << V.totalNota;
+                cout << "\n  Data  e  Horas     : "; imprimirData(V.DataVenda);
+                cout << "\n --------------------------------------";
+                cout << "\n Excluir (S/N)?";
+                cin >> excluir;
+                if(toupper(excluir) == 'S') {
+                    ExcluirVenda(escolha);
+                    cout << "Exclusão feita com sucesso";
+                } else {
+                    cout << "Exclusão cancelada";
+                }
+                pausa();
+                system("cls");
+			}
+		} else if (opcaoE == 2) {
+			RegItem item;
+			
+			RelatorioVenda();
+		
+			cout << "\n";
+			cout << "\n -----------------------------------------\n";
+        	cout << "           *** EXCLUSÃO DE ITEM ***";
+        	cout << "\n -----------------------------------------\n";
+			cout << "\n- Para sair: Digite = 0 ";
+			cout << "\n- Informe o N° Nota: ";
+			cin >> escolha;
+			while(escolha < 0) {
+				cout << "\nEscolha inválida! Digite novamente: ";
+				cin >> escolha;
+			}
+			
+			cout << "\n- Informe o Código do Item: ";
+			cin >> escolhaS;
+			while(escolhaS < 0) {
+				cout << "\nEscolha inválida! Digite novamente: ";
+				cin >> escolhaS;
+			}
+			
+			posicao = ConsultaVenda(escolha);
+			posicaoS = ConsultaItem(escolhaS);
+			
+			if((posicao == -1) || (posicaoS == -1)) {
+				cout << "\n Item não cadastrado";
+                pausa();
+			} else {
+				system("cls");
+				ArqItens == fopen("Itens.dat", "rb");
+				fseek(ArqItens, posicaoS, SEEK_SET);
+				fread(&item, sizeof(item), 1, ArqItens);
+				fclose(ArqItens);
+				
+				cout << "\n --------------------------------------";
+                cout << "\n  *** INFORMAÇÕES DO PRODUTO ***";
+                cout << "\n --------------------------------------";
+                cout << "\n  Nº Nota        : " << item.NumeroNota;
+                cout << "\n  Código         : " << item.CodigoItem;
+                cout << "\n  Descrição      : " << item.DescricaoItem;
+                cout << "\n  Qtd. Vendida   : " << item.QtdVendida;
+                cout << "\n  Preço Unitário : " << item.PrecoUnitario;
+                cout << "\n --------------------------------------";
+                cout << "\n Excluir (S/N)?";
+                cin >> excluir;
+                if(toupper(excluir) == 'S') {
+                    ExcluirItem(escolha, escolhaS);
+                    cout << "Exclusão feita com sucesso";
+                } else {
+                    cout << "Exclusão cancelada";
+                }
+                pausa();
+                system("cls");
+			}
+		} 
+	} while(opcaoE != 0);
+    pausa();
+}
 
+long int ExcluirVenda(int numNota) {
+	system("cls");
+	long int pos = -1;
+	RegVenda v;
+	
+	FILE *ArqTemp;
+	
+	ArqVendas = fopen("Vendas.dat", "rb");
+	if(ArqVendas == NULL) {
+		cout << "Erro na abertura do arquivo \n";
+		pausa();
+		exit(1);
+	} 
+	
+	ArqTemp = fopen("Temp.dat", "wb");
+    if(ArqTemp == NULL) {
+        cout << "Erro ao criar arquivo temporario \n";
+        fclose(ArqVendas);
+        pausa();
+        exit(1);
+    }
+	
+	while(fread(&v, sizeof(v), 1, ArqVendas) == 1) {
+		if(v.NumeroNota == numNota) {
+			pos = ftell(ArqItens) - (long)sizeof(v);
+		} else {
+			fwrite(&v, sizeof(v), 1, ArqTemp);
+		}
+	}
+	fclose(ArqVendas);
+	fclose(ArqTemp);
+	
+	if(pos != -1) {
+		remove("Vendas.dat");
+		rename("Temp.dat", "Vendas.dat");
+	} else {
+		remove("Temp.dat");
+	}
+	return pos;
+}
 
-
+long int ExcluirItem(int numNota, int codItem) {
+	system("cls");
+	long int pos = -1;
+	RegItem item;
+	
+	FILE *ArqTemp;
+	
+	ArqItens = fopen("Itens.dat", "rb");
+	if(ArqItens == NULL) {
+		cout << "Erro na abertura do arquivo \n";
+		pausa();
+		exit(1);
+	} 
+	
+	ArqTemp = fopen("Temp.dat", "wb");
+    if(ArqTemp == NULL) {
+        cout << "Erro ao criar arquivo temporario \n";
+        fclose(ArqItens);
+        pausa();
+        exit(1);
+    }
+	
+	while(fread(&item, sizeof(item), 1, ArqVendas) == 1) {
+		if((item.NumeroNota == numNota) && (item.CodigoItem)) {
+			pos = ftell(ArqItens) - (long)sizeof(item);
+		} else {
+			fwrite(&item, sizeof(item), 1, ArqTemp);
+		}
+	}
+	fclose(ArqItens);
+	fclose(ArqTemp);
+	
+	if(pos != -1) {
+		remove("Itens.dat");
+		rename("Temp.dat", "Itens.dat");
+	} else {
+		remove("Temp.dat");
+	}
+	return pos;
+}

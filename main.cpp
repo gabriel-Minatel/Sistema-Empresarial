@@ -3,10 +3,11 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
-#include <clocale>
+#include <locale.h>
 #include <time.h>
 #include <cstring>
 #include <string> 
+#include <windows.h>
 
 using namespace std;
 
@@ -69,6 +70,9 @@ void BaixaEstoque(long int pos, int qtd);
 void RelatorioVenda();
 void PesquisaVenda();
 long int ConsultaVenda(int cod);
+void MenuEdicaoVenda();
+void EditarVenda(int pos);
+void EditarItem(long int numNota, long int posVenda);
 
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "Portuguese");
@@ -78,10 +82,13 @@ int main(int argc, char** argv) {
 
 void MenuPrincipal() {
     int opcao;
+    string nome;
     do {
+    	//cout << "- Nome da Empresa: ";
+    	//getline(cin, nome);
         system("cls");
         cout << "\n ================ SISTEMA DE CONTROLE DE BAR ================";
-        cout << "\n             ------- Usuário: --- -------";
+        //cout << "\n             ------- Usuário: " << nome << " -------";
         cout << "\n =================================================================";
         cout << "\n 1 - Menu de Produtos";
         cout << "\n 2 - Menu de Vendas";
@@ -348,7 +355,7 @@ void MenuEdicaoProd() {
         cout << "           *** MENU DE MODIFICAÇÃO ***";
         cout << "\n -----------------------------------------\n";
         cout << "\n1) Ver Relatório de Produtos Cadastrados; ";
-        cout << "\n0) Para retornar ao Menu Principal;       ";
+        cout << "\n0) Para retornar ao Menu de Produtos;       ";
         cout << "\n- Digite sua escolha: ";
         cin >> opcaoM;
         while((opcaoM < 0) || (opcaoM > 1)) {
@@ -569,9 +576,9 @@ void MenuVendas() {
             case 3: system("cls");
                     PesquisaVenda();
                     pausa();
-                    break;  /*
+                    break;  
             case 4: MenuEdicaoVenda();
-                    break;
+                    break;/*
             case 5: MenuExclusaoVenda();
                     break;*/
             default: cout << "\n Tecle <Enter> para retornar ao menu principal "; system("pause>>null");
@@ -851,4 +858,131 @@ void PesquisaVenda() {
 		fclose(ArqItens);
 	}
 }
+
+void MenuEdicaoVenda() {
+	int Nnota, pos;
+	int opcaoM;
+	RegVenda V;
+	RegItem itens;
+	int escolha;
+	
+	system("cls");
+	do {
+		cout << "\n ------------------------------------------------\n";
+        cout << "           *** MENU DE EDIÇÃO (VENDA) ***";
+        cout << "\n ------------------------------------------------\n";
+        cout << "\n1) Ver Relatório de Vendas Cadastrados; ";
+		cout << "\n0) Para retornar ao Menu de Vendas;     ";
+        cout << "\n- Digite sua escolha: ";
+        cin >> opcaoM;
+        while((opcaoM < 0) || (opcaoM > 1)) {
+            cout << "\n Opção Inválida! Digite novamente: ";
+            cin >> opcaoM;
+        }
+		if(opcaoM == 1) {
+			RelatorioVenda();
+			cout << "\n *-------------------------------* \n";
+			cout << "\n Se quiser retornar, digite = 0 ";
+			cout << "\n- Venda que será modificada (Nº Nota): ";
+			cin >> Nnota;
+			if(Nnota == 0) {
+				pausa();
+				system("cls");
+			} else {
+				pos = ConsultaVenda(Nnota);
+				if(pos == -1) {
+					cout << "\n Venda não existe";
+					pausa();
+				} else {
+					system("cls");
+					ArqVendas = fopen("Vendas.dat", "rb");
+					fseek(ArqVendas, pos, SEEK_SET);
+					fread(&V, sizeof(V), 1, ArqVendas);
+					fclose(ArqVendas);
+					cout << "\n --------------------------------------";
+					cout << "\n	*** INFORMAÇÕES DA VENDA ***";
+					cout << "\n --------------------------------------";
+					cout << "\n Nº da Nota: " << V.NumeroNota;
+					cout << "\n Cliente (ou Mesa): " << V.clienteNome;
+					cout << "\n Forma de Pagamento: " << V.formaPagamento;
+					cout << "\n Qtd. Vendida: " << fixed << setprecision(2) << V.totalItens;
+					cout << "\n Preço Vendido: " << fixed << setprecision(2) << V.totalNota;
+					cout << "\n Data e Horas: "; imprimirData(V.DataVenda);
+					cout << "\n --------------------------------------\n";
+					
+					cout << "\n --------------------------------------";
+			        cout << "\n  *** INFORMAÇÕES DOS ITENS ***";
+			        cout << "\n --------------------------------------";
+					
+					ArqItens = fopen("Itens.dat", "rb");
+					fseek(ArqItens, pos, SEEK_SET);
+					fread(&itens, sizeof(itens), 1, ArqItens);
+			
+					rewind(ArqItens);
+			        while(fread(&itens, sizeof(itens), 1, ArqItens) == 1) {
+			            if(itens.NumeroNota == V.NumeroNota) {
+			                cout << "\n  Código do Produto : " << itens.CodigoItem;
+					        cout << "\n  Descrição : " << itens.DescricaoItem;
+					        cout << "\n  Preço Unitário : " << fixed << setprecision(2) << itens.PrecoUnitario;
+					        cout << "\n  Qtd. Vendida : " << itens.QtdVendida;
+					        cout << "\n --------------------------------------";
+			            }
+			        }
+					fclose(ArqItens);
+					cout << "\n1) Para editar Venda";
+					cout << "\n0) Para sair...";
+					cout << "\n- Informe sua escolha: ";
+					cin >> escolha;
+					while((escolha < 0) || (escolha > 2)) {
+						cout << "\nInválido! Digite um valor [1, 2 ou 3]: ";
+						cin >> escolha;
+					}
+					if(escolha == 1) {
+						EditarVenda(pos);
+					} else {
+						cout << "\n Saindo...";
+					}
+				}
+			}
+		}
+	} while(opcaoM != 0);
+	pausa();
+}
+
+void EditarVenda(int pos) {
+	char escolha;
+	RegVenda V;
+	
+	ArqVendas = fopen("Vendas.dat", "r+b");
+	fseek(ArqVendas, pos, SEEK_SET);
+	fread(&V, sizeof(V), 1, ArqVendas);
+	
+	cout << "\n *** MODIFICAR VENDA ***";
+	cout << "\n Número da Nota: " << V.NumeroNota;
+	cout << "\n- Modificar Descrição de Venda (S/N): ";
+	cin >> escolha;
+	if(toupper(escolha) == 'S') {
+		cout << "\n- Novo Descrição de Venda: ";
+		cin.ignore(80, '\n');
+		cin.getline(V.clienteNome, sizeof(V.clienteNome));
+	}
+	
+	cout << "\n Modificar Forma de Pagamento (S/N): ";
+	cin >> escolha;
+	if(toupper(escolha) == 'S') {
+		cout << "\n- Novo Descrição de Forma de Pagamento: ";
+		cin.ignore(80, '\n');
+		cin.getline(V.formaPagamento, sizeof(V.formaPagamento));
+	}
+	
+	fseek(ArqVendas, pos, SEEK_SET);
+	fwrite(&V, sizeof(V), 1, ArqVendas);
+	fclose(ArqVendas);
+	cout << "\n Venda Alterada com sucesso";
+	pausa();
+	system("cls");
+}
+
+
+
 

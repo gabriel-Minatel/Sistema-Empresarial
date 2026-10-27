@@ -32,14 +32,13 @@ RegProduto Prod;
 FILE *ArqFornecedores;
 typedef struct Fornecedores {
     long int id;
-    char razao_social[60];
-    char nome_fantasia[60];
-    char cnpj[19];               // Ex: 00.000.000/0001-00
-    char telefone[15];           // Ex: (11) 99999-9999
-    char email[50];
+    char nome_empresa[50];
+    char cnpj[20];          
+    char telefone[20];      
+    char email[30];
     char nome_contato[50];
-    char cidade[50];
-    char estado[3];              // Ex: SP
+    char cidade[40];
+    char estado[4];              
 } RegFornecedor;
 
 RegFornecedor Forne;
@@ -101,6 +100,7 @@ long int ExcluirItem(int numNota, int codItem);
 void MenuFornecedores();
 void AdicionarForne();
 long int ultimoForne();
+void RelatorioForne();
 
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "Portuguese");
@@ -1187,10 +1187,10 @@ void MenuFornecedores() {
             case 1: system("cls");
                     AdicionarForne();
                     break;
-            /*case 2: RelatorioVenda();
+            case 2: RelatorioForne();
                     pausa();
                     break;
-            case 3: system("cls");
+            /*case 3: system("cls");
                     PesquisaVenda();
                     pausa();
                     break;  
@@ -1217,30 +1217,30 @@ void AdicionarForne() {
 	do {
 		Forne.id = ultimoForne();
 		cout << "\n ID do Fornecedor: " << Forne.id;
+		
 		cin.ignore(80, '\n');
-		cout << "\n Razão Social: ";
-		cin.getline(Forne.razao_social, sizeof(Forne.razao_social));
-		cin.ignore(80, '\n');
-		cout << "\n Nome Fantasia (Nome da Empresa): ";
-		cin.getline(Forne.nome_fantasia, sizeof(Forne.nome_fantasia));
-		cin.ignore(80, '\n');
-		cout << "\n CNPJ [ Ex.: 00.000.000/0001-00 ]: ";
-		cin.getline(Forne.cnpj, sizeof(Forne.cnpj));
-		cin.ignore(80, '\n');
-		cout << "\n Telefone [ Ex.: (11) 99999-9999 ]: ";
-		cin.getline(Forne.telefone, sizeof(Forne.telefone));
-		cin.ignore(80, '\n');
-		cout << "\n E-mail: ";
-		cin.getline(Forne.email, sizeof(Forne.email));
-		cin.ignore(80, '\n');
-		cout << "\n Nome de Contato ( Representante da Empresa ): ";
-		cin.getline(Forne.nome_contato, sizeof(Forne.nome_contato));
-		cin.ignore(80, '\n');
-		cout << "\n Estado (dois digitos, ex.: XX): ";
-		cin.getline(Forne.estado, sizeof(Forne.estado));
-		cin.ignore(80, '\n');
-		cout << "\n Cidade: ";
-		cin.getline(Forne.cidade, sizeof(Forne.cidade));
+		
+		cout << "\n Nome da Empresa: ";
+        cin.getline(Forne.nome_empresa, sizeof(Forne.nome_empresa));
+
+        cout << "\n CNPJ [ Ex.: 00.000.000/0001-00 ]: ";
+        cin.getline(Forne.cnpj, sizeof(Forne.cnpj));
+
+        cout << "\n Telefone [ Ex.: (11) 99999-9999 ]: ";
+        cin.getline(Forne.telefone, sizeof(Forne.telefone));
+
+        cout << "\n E-mail: ";
+        cin.getline(Forne.email, sizeof(Forne.email));
+
+        cout << "\n Nome de Contato ( Representante da Empresa ): ";
+        cin.getline(Forne.nome_contato, sizeof(Forne.nome_contato));
+
+        cout << "\n Estado (dois dígitos, ex.: SP): ";
+        cin.getline(Forne.estado, sizeof(Forne.estado));
+		strupr(Forne.estado);
+
+        cout << "\n Cidade: ";
+        cin.getline(Forne.cidade, sizeof(Forne.cidade));
 		
 		fwrite(&Forne, sizeof(Forne), 1, ArqFornecedores);
         fflush(ArqFornecedores); // buffer para ultimoFornecedor ver o registro e por nº    
@@ -1269,4 +1269,42 @@ long int ultimoForne() {
     fclose(f);
     return cod;
 }
+
+void RelatorioForne() {
+	system("cls");
+    ArqFornecedores = fopen("Fornecedores.dat", "rb"); // open read binary
+    if(ArqFornecedores == NULL) {
+        cout << "Nenhum produto cadastrado ainda \n";
+        pausa();
+        return;
+    }
+    cout << "\n                                *** FORNECEDORES ***";
+    cout << "\n -------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+    cout << left  << setw(6) << "ID"
+         << left  << setw(22) << "Nome Empresa"
+         << right << setw(20) << "CNPJ"
+         << right << setw(17) << "Telefone"
+         << right << setw(28) << "E-mail"
+         << right << setw(22) << "Nome Vendedor"
+         << right << setw(8) << "Estado"
+         << right << setw(20) << "Cidade";
+    cout << "\n -------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
+   
+    while(fread(&Forne, sizeof(Forne), 1, ArqFornecedores) == 1) {
+        cout << "\n";
+        cout << left  << setw(6) << Forne.id;
+        cout << left  << setw(22) << Forne.nome_empresa;
+        cout << right << setw(20) << Forne.cnpj;
+        cout << right << setw(17) << Forne.telefone;
+        cout << right << setw(28) << Forne.email;
+        cout << right << setw(22) << Forne.nome_contato;
+        cout << right << setw(8) << Forne.estado;
+        cout << right << setw(20) << Forne.cidade;                   
+    }
+    cout << endl;
+       
+    fclose(ArqFornecedores);
+}
+
+
 

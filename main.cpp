@@ -14,12 +14,10 @@ using namespace std;
 
 FILE *ArqProduto; // arquivo
 
-
 typedef struct data {
     int dia, mes, ano;
     int hora, min, seg;
 } DATA;
-
 
 typedef struct Produto {
     long int Codigo;
@@ -31,6 +29,20 @@ typedef struct Produto {
 // Variavel Registro
 RegProduto Prod;
 
+FILE *ArqFornecedores;
+typedef struct Fornecedores {
+    long int id;
+    char razao_social[60];
+    char nome_fantasia[60];
+    char cnpj[19];               // Ex: 00.000.000/0001-00
+    char telefone[15];           // Ex: (11) 99999-9999
+    char email[50];
+    char nome_contato[50];
+    char cidade[50];
+    char estado[3];              // Ex: SP
+} RegFornecedor;
+
+RegFornecedor Forne;
 
 FILE *ArqItens;
 typedef struct Item {
@@ -53,7 +65,7 @@ typedef struct Venda {
 } RegVenda;
 
 
-// Protótipos
+// Protótipos Produtos
 void MenuPrincipal();
 void MenuProdutosBar();
 void pausa();
@@ -69,9 +81,7 @@ void EditarProduto(int pos);
 void MenuExclusaoProd();
 long int ExcluirProduto(int cod);
 
-
-
-
+// Protótipos Vendas / Itens
 void MenuVendas();
 void AdicionarVenda();
 long int ultimaNota(); 
@@ -87,6 +97,10 @@ void MenuExclusaoVenda();
 long int ExcluirVenda(int numNota);
 long int ExcluirItem(int numNota, int codItem);
 
+// Protótipos Fornecedores
+void MenuFornecedores();
+void AdicionarForne();
+long int ultimoForne();
 
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "Portuguese");
@@ -94,20 +108,16 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-
 void MenuPrincipal() {
     int opcao;
-    string nome;
     do {
-        //cout << "- Nome da Empresa: ";
-        //getline(cin, nome);
         system("cls");
-        cout << "\n ================ SISTEMA DE CONTROLE DE BAR ================";
-        //cout << "\n             ------- Usuário: " << nome << " -------";
+        cout << "\n ================    SISTEMA DE CONTROLE DE BAR    ===============";
         cout << "\n =================================================================";
         cout << "\n 1 - Menu de Produtos";
         cout << "\n 2 - Menu de Vendas";
-        cout << "\n 0 - Encerrar Programa";
+        cout << "\n 3 - Menu de Fornecedores";
+		cout << "\n 0 - Encerrar Programa";
         cout << "\n\n - Escolha a opção: ";
         cin >> opcao;
         switch(opcao) {
@@ -115,7 +125,9 @@ void MenuPrincipal() {
                     break;
             case 2: MenuVendas();
                     break;
-            default: cout << "\n Tecle <Enter> para sair do programa "; system("pause>>null");
+            case 3: MenuFornecedores();
+                    break;
+			default: cout << "\n Tecle <Enter> para sair do programa "; system("pause>>null");
                     break;
         }
     } while(opcao != 0);
@@ -596,7 +608,6 @@ void MenuVendas() {
                     break;
             case 5: MenuExclusaoVenda();
                     break;
-                    /**/
             default: cout << "\n Tecle <Enter> para retornar ao menu principal "; system("pause>>null");
                     break;
         }
@@ -905,9 +916,6 @@ void PesquisaVenda() {
         fseek(ArqItens, result, SEEK_SET);
         fread(&itens, sizeof(itens), 1, ArqItens);
 
-
-
-
         rewind(ArqItens);
         while(fread(&itens, sizeof(itens), 1, ArqItens) == 1) {
             if(itens.NumeroNota == V.NumeroNota) {
@@ -1160,3 +1168,105 @@ long int ExcluirVenda(int numNota) {
     }
     return pos;
 }
+
+void MenuFornecedores() {
+	int opcao;
+    do {
+        system("cls");
+        cout << "\n ================ MENU DE FORNECEDORES ================";
+        cout << "\n\n ";
+        cout << "\n 1 - Adicionar Fornecedor";
+        cout << "\n 2 - Relatório de Fornecedores";
+        cout << "\n 3 - Pesquisar de Fornecedor";
+        cout << "\n 4 - Editar Fornecedor";
+        cout << "\n 5 - Excluir Fornecedor";
+        cout << "\n 0 - Retornar ao Menu Principal";
+        cout << "\n\n - Escolha a opção: ";
+        cin >> opcao;
+        switch(opcao) {
+            case 1: system("cls");
+                    AdicionarForne();
+                    break;
+            /*case 2: RelatorioVenda();
+                    pausa();
+                    break;
+            case 3: system("cls");
+                    PesquisaVenda();
+                    pausa();
+                    break;  
+            case 4: MenuEdicaoVenda();
+                    break;
+            case 5: MenuExclusaoVenda();
+                    break;*/
+            default: cout << "\n Tecle <Enter> para retornar ao menu principal "; system("pause>>null");
+                    break;
+        }
+    } while(opcao != 0);
+}
+
+void AdicionarForne() {
+	char opcao;
+	system("cls");
+	ArqFornecedores = fopen("Fornecedores.dat", "ab");
+	if(ArqFornecedores == NULL) {
+		cout << "Erro na abertura do arquivo \n";
+		system("pause");
+		exit(1);
+	}
+	
+	do {
+		Forne.id = ultimoForne();
+		cout << "\n ID do Fornecedor: " << Forne.id;
+		cin.ignore(80, '\n');
+		cout << "\n Razão Social: ";
+		cin.getline(Forne.razao_social, sizeof(Forne.razao_social));
+		cin.ignore(80, '\n');
+		cout << "\n Nome Fantasia (Nome da Empresa): ";
+		cin.getline(Forne.nome_fantasia, sizeof(Forne.nome_fantasia));
+		cin.ignore(80, '\n');
+		cout << "\n CNPJ [ Ex.: 00.000.000/0001-00 ]: ";
+		cin.getline(Forne.cnpj, sizeof(Forne.cnpj));
+		cin.ignore(80, '\n');
+		cout << "\n Telefone [ Ex.: (11) 99999-9999 ]: ";
+		cin.getline(Forne.telefone, sizeof(Forne.telefone));
+		cin.ignore(80, '\n');
+		cout << "\n E-mail: ";
+		cin.getline(Forne.email, sizeof(Forne.email));
+		cin.ignore(80, '\n');
+		cout << "\n Nome de Contato ( Representante da Empresa ): ";
+		cin.getline(Forne.nome_contato, sizeof(Forne.nome_contato));
+		cin.ignore(80, '\n');
+		cout << "\n Estado (dois digitos, ex.: XX): ";
+		cin.getline(Forne.estado, sizeof(Forne.estado));
+		cin.ignore(80, '\n');
+		cout << "\n Cidade: ";
+		cin.getline(Forne.cidade, sizeof(Forne.cidade));
+		
+		fwrite(&Forne, sizeof(Forne), 1, ArqFornecedores);
+        fflush(ArqFornecedores); // buffer para ultimoFornecedor ver o registro e por nº    
+        cout << "\n Adicionar outro fornecedor (S/N)? ";
+        cin >> opcao;
+        
+	} while(toupper(opcao) == 'S');
+	fclose(ArqFornecedores);
+	
+}
+
+long int ultimoForne() {
+    long int cod;
+    RegFornecedor aux;
+    
+    FILE *f = fopen("Fornecedores.dat", "rb");
+    
+    if(f == NULL) return 1;
+    if(fread(&aux, sizeof(aux), 1, f) == 0) {
+        cod = 1;
+    } else {
+        fseek(f, -(long)sizeof(aux), SEEK_END);
+        fread(&aux, sizeof(aux), 1, f);
+        cod = aux.id + 1;
+    }
+    fclose(f);
+    return cod;
+}
+

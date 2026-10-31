@@ -259,13 +259,13 @@ void CadastrarProd() {
         consultaID = ConsultaForne(Prod.ID_Fornecedor);
         if(consultaID == -1) {
             cout << "\n Fornecedor não cadastrado";
-            cout << "\n Deseja Cadastrar Fornecedor (S/N)?";
+            cout << "\n Deseja Cadastrar um Fornecedor (S/N): ";
             cin >> opcaoC;
-            if(toupper(opcaoC) == 'S') {
-            	AdicionarForne();
-            	Prod.ID_Fornecedor = Forne.id;
+			if(toupper(opcaoC) == 'S') {
+				AdicionarForne();
+				Prod.ID_Fornecedor = Forne.id;
 			} else {
-				Prod.ID_Fornecedor = 0;
+	            Prod.ID_Fornecedor = 0;
 			}
         } else {
             ArqFornecedores = fopen("Fornecedores.dat", "rb");
@@ -298,6 +298,7 @@ void CadastrarProd() {
     fclose(ArqProduto); // Fechando Arquivo
 }
 
+
 DATA gerarData() {
     DATA D;
     time_t mytime = time(NULL);
@@ -310,6 +311,7 @@ DATA gerarData() {
     D.seg  = tm.tm_sec;
     return D;
 }
+
 
 // Imprime no formato dd/mm/aaaa hh:mm:ss (19 caracteres)
 void imprimirData(DATA D) {
@@ -335,6 +337,7 @@ void imprimirData(DATA D) {
     else
         cout << D.seg;
 }  
+
 
 void RelatorioProd() {
     system("cls");
@@ -373,6 +376,7 @@ void RelatorioProd() {
     fclose(ArqProduto);
 }
 
+
 void BuscaProduto() {
     int buscaCod, result;
     
@@ -402,6 +406,7 @@ void BuscaProduto() {
     }
 }
 
+
 long int ConsultaProduto(int cod) {
     system("cls");
     ArqProduto = fopen("Produtos.dat", "rb");
@@ -420,6 +425,7 @@ long int ConsultaProduto(int cod) {
     fclose(ArqProduto);
     return -1;
 }
+
 
 void MenuEdicaoProd() {
     int cod, pos;
@@ -475,9 +481,10 @@ void MenuEdicaoProd() {
     pausa();
 }
 
+
 void EditarProduto(int pos) {
-    char escolha, opcaoC;
-    int consultaID;
+    char escolha;
+    int consultaID, opcaoC;
     ArqProduto = fopen("Produtos.dat", "r+b");
     fseek(ArqProduto, pos, SEEK_SET);
     fread(&Prod, sizeof(Prod), 1, ArqProduto);
@@ -531,13 +538,13 @@ void EditarProduto(int pos) {
         consultaID = ConsultaForne(Prod.ID_Fornecedor);
         if(consultaID == -1) {
             cout << "\n Fornecedor não cadastrado";
-            cout << "\n Deseja Cadastrar Fornecedor (S/N)?";
+            cout << "\n Deseja Cadastrar um Fornecedor (S/N): ";
             cin >> opcaoC;
-            if(toupper(opcaoC) == 'S') {
-            	AdicionarForne();
-            	Prod.ID_Fornecedor = Forne.id;
+			if(toupper(opcaoC) == 'S') {
+				AdicionarForne();
+				Prod.ID_Fornecedor = Forne.id;
 			} else {
-				Prod.ID_Fornecedor = 0;
+	            Prod.ID_Fornecedor = 0;
 			}
         } else {
             ArqFornecedores = fopen("Fornecedores.dat", "rb");
@@ -565,6 +572,7 @@ void EditarProduto(int pos) {
     pausa();
     system("cls");
 }
+
 
 void MenuExclusaoProd() {
     system("cls");
@@ -623,6 +631,7 @@ void MenuExclusaoProd() {
     pausa();
 }
 
+
 long int ExcluirProduto(int cod) {
     system("cls");
     long int pos = -1; // Posicao do registro excluído
@@ -662,6 +671,7 @@ long int ExcluirProduto(int cod) {
     return pos;
 }
 
+
 void MenuVendas() {
     int opcao;
     do {
@@ -696,6 +706,7 @@ void MenuVendas() {
         }
     } while(opcao != 0);
 }
+
 
 void AdicionarVenda() {
     char opcao;
@@ -1437,9 +1448,7 @@ void BuscaForne() {
 long int ConsultaForne(int id) {
     ArqFornecedores = fopen("Fornecedores.dat", "rb");
     if(ArqFornecedores == NULL) {
-        cout << "Erro na abertura do arquivo \n";
-        pausa();
-        exit(1);    
+        return -1;    
     }
     while(fread(&Forne, sizeof(Forne), 1, ArqFornecedores) == 1) {
         if(Forne.id == id) {
@@ -1584,7 +1593,6 @@ void EditarForne(int pos) {
     system("cls");
 }
 
-
 void MenuExclusaoForne() {
     system("cls");
     int opcaoE, posicao, id;
@@ -1643,7 +1651,6 @@ void MenuExclusaoForne() {
     } while(opcaoE != 0);
     pausa();
 }
-
 
 long int ExcluirForne(int id) {
     system("cls");

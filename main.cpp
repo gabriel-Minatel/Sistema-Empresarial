@@ -8,18 +8,14 @@
 #include <cstring>
 #include <string> 
 
-
 using namespace std;
 
-
 FILE *ArqProduto; // arquivo
-
 
 typedef struct data {
     int dia, mes, ano;
     int hora, min, seg;
 } DATA;
-
 
 typedef struct Produto {
     long int Codigo;
@@ -31,7 +27,6 @@ typedef struct Produto {
 } RegProduto;
 // Variavel Registro
 RegProduto Prod;
-
 
 FILE *ArqFornecedores;
 typedef struct Fornecedores {
@@ -45,9 +40,7 @@ typedef struct Fornecedores {
     char estado[4];              
 } RegFornecedor;
 
-
 RegFornecedor Forne;
-
 
 FILE *ArqItens;
 typedef struct Item {
@@ -58,9 +51,6 @@ typedef struct Item {
     float PrecoUnitario; // PrecoUnitario tem relacao com PrecoVenda
 } RegItem;
 
-
-
-
 FILE *ArqVendas; 
 typedef struct Venda {
     long int NumeroNota;
@@ -70,7 +60,6 @@ typedef struct Venda {
     char formaPagamento[50];
     int totalItens;
 } RegVenda;
-
 
 // Protótipos Produtos
 void MenuPrincipal();
@@ -89,7 +78,6 @@ void MenuExclusaoProd();
 long int ExcluirProduto(int cod);
 void ArquivoProd();
 
-
 // Protótipos Vendas / Itens
 void MenuVendas();
 void AdicionarVenda();
@@ -106,7 +94,6 @@ void MenuExclusaoVenda();
 long int ExcluirVenda(int numNota);
 long int ExcluirItem(int numNota, int codItem);
 
-
 // Protótipos Fornecedores
 void MenuFornecedores();
 void AdicionarForne();
@@ -119,13 +106,11 @@ void EditarForne(int pos);
 void MenuExclusaoForne();
 long int ExcluirForne(int id);
 
-
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "Portuguese");
     MenuPrincipal();
     return 0;
 }
-
 
 void MenuPrincipal() {
     int opcao;
@@ -151,7 +136,6 @@ void MenuPrincipal() {
         }
     } while(opcao != 0);
 }
-
 
 void MenuProdutosBar() {
     int opcao;
@@ -187,21 +171,17 @@ void MenuProdutosBar() {
     } while(opcao != 0);
 }
 
-
 void pausa() {
     cout << "\n Tecle <Enter> para voltar ao Menu de Opções";
     system("pause>>null");
 }
-
 
 long int ultimoCod() {
     long int cod;
     RegProduto aux;                             // local: não mexe na global Prod
     FILE *f = fopen("Produtos.dat", "rb");      // local: não mexe na global ArqProduto
 
-
     if(f == NULL) return 1;
-
 
     if(fread(&aux, sizeof(aux), 1, f) == 0) {   // arquivo vazio: 1º código
         cod = 1;
@@ -214,7 +194,6 @@ long int ultimoCod() {
     fclose(f);                                  // fecha o arquivo
     return cod;
 }
-
 
 void CadastrarProd() {
     char opcao, opcaoC;
@@ -298,7 +277,6 @@ void CadastrarProd() {
     fclose(ArqProduto); // Fechando Arquivo
 }
 
-
 DATA gerarData() {
     DATA D;
     time_t mytime = time(NULL);
@@ -311,7 +289,6 @@ DATA gerarData() {
     D.seg  = tm.tm_sec;
     return D;
 }
-
 
 // Imprime no formato dd/mm/aaaa hh:mm:ss (19 caracteres)
 void imprimirData(DATA D) {
@@ -337,7 +314,6 @@ void imprimirData(DATA D) {
     else
         cout << D.seg;
 }  
-
 
 void RelatorioProd() {
     system("cls");
@@ -376,7 +352,6 @@ void RelatorioProd() {
     fclose(ArqProduto);
 }
 
-
 void BuscaProduto() {
     int buscaCod, result;
     
@@ -406,7 +381,6 @@ void BuscaProduto() {
     }
 }
 
-
 long int ConsultaProduto(int cod) {
     system("cls");
     ArqProduto = fopen("Produtos.dat", "rb");
@@ -425,7 +399,6 @@ long int ConsultaProduto(int cod) {
     fclose(ArqProduto);
     return -1;
 }
-
 
 void MenuEdicaoProd() {
     int cod, pos;
@@ -480,7 +453,6 @@ void MenuEdicaoProd() {
     } while(opcaoM != 0);
     pausa();
 }
-
 
 void EditarProduto(int pos) {
     char escolha;
@@ -573,7 +545,6 @@ void EditarProduto(int pos) {
     system("cls");
 }
 
-
 void MenuExclusaoProd() {
     system("cls");
     int opcaoE, posicao, cod;
@@ -631,7 +602,6 @@ void MenuExclusaoProd() {
     pausa();
 }
 
-
 long int ExcluirProduto(int cod) {
     system("cls");
     long int pos = -1; // Posicao do registro excluído
@@ -671,7 +641,6 @@ long int ExcluirProduto(int cod) {
     return pos;
 }
 
-
 void MenuVendas() {
     int opcao;
     do {
@@ -706,7 +675,6 @@ void MenuVendas() {
         }
     } while(opcao != 0);
 }
-
 
 void AdicionarVenda() {
     char opcao;
@@ -811,7 +779,6 @@ void AdicionarVenda() {
     imprimirData(V.DataVenda);
 }
 
-
 long int ultimaNota() {
     long int cod;
     RegVenda aux;
@@ -830,7 +797,6 @@ long int ultimaNota() {
     return cod;
 }
 
-
 void BaixaEstoque(long int pos, int qtd) {
     RegProduto aux;
     FILE *f = fopen("Produtos.dat", "r+b");
@@ -843,7 +809,6 @@ void BaixaEstoque(long int pos, int qtd) {
     fwrite(&aux, sizeof(aux), 1, f);
     fclose(f);
 }
-
 
 void RelatorioVenda() {
     system("cls");
@@ -866,7 +831,6 @@ void RelatorioVenda() {
     cout << fixed << setprecision(2);
     string linha(89, '-');
 
-
     cout << "\n                                  *** VENDAS FEITAS ***\n";
     cout << " " << linha << "\n ";
     cout << left  << setw(8)  << "Nº Nota"
@@ -886,7 +850,6 @@ void RelatorioVenda() {
              << left  << setw(18) << string(V.formaPagamento).substr(0, 17)
              << right << setw(6)  << V.totalItens << "  ";
         imprimirData(V.DataVenda);
-
 
         // cabeçalho dos itens (uma vez por venda)
         cout << "\n ";
@@ -911,14 +874,10 @@ void RelatorioVenda() {
     }
     cout << endl;
 
-
     fclose(ArqVendas);
     fclose(ArqItens);
     
 }
-
-
-
 
 long int ConsultaVenda(int cod) {
     system("cls");
@@ -940,9 +899,6 @@ long int ConsultaVenda(int cod) {
     return -1;
 }
 
-
-
-
 long int ConsultaItem(int cod) {
     system("cls");
     ArqItens = fopen("Itens.dat", "rb");
@@ -962,9 +918,6 @@ long int ConsultaItem(int cod) {
     fclose(ArqItens);
     return -1;
 }
-
-
-
 
 void PesquisaVenda() {
     int buscaCod, result;
@@ -1017,9 +970,6 @@ void PesquisaVenda() {
         fclose(ArqItens);
     }
 }
-
-
-
 
 void MenuEdicaoVenda() {
     int Nnota, pos;
@@ -1111,9 +1061,6 @@ void MenuEdicaoVenda() {
     pausa();
 }
 
-
-
-
 void EditarVenda(int pos) {
     char escolha;
     RegVenda V;
@@ -1147,9 +1094,6 @@ void EditarVenda(int pos) {
     pausa();
     system("cls");
 }
-
-
-
 
 void MenuExclusaoVenda() {
     system("cls");
@@ -1221,9 +1165,6 @@ void MenuExclusaoVenda() {
     pausa();
 }
 
-
-
-
 long int ExcluirVenda(int numNota) {
     system("cls");
     long int pos = -1;
@@ -1265,7 +1206,6 @@ long int ExcluirVenda(int numNota) {
     return pos;
 }
 
-
 void MenuFornecedores() {
     int opcao;
     do {
@@ -1300,7 +1240,6 @@ void MenuFornecedores() {
         }
     } while(opcao != 0);
 }
-
 
 void AdicionarForne() {
     char opcao;
@@ -1356,7 +1295,6 @@ void AdicionarForne() {
     
 }
 
-
 long int ultimoForne() {
     long int cod;
     RegFornecedor aux;
@@ -1374,7 +1312,6 @@ long int ultimoForne() {
     fclose(f);
     return cod;
 }
-
 
 void RelatorioForne() {
     system("cls");
@@ -1412,7 +1349,6 @@ void RelatorioForne() {
     fclose(ArqFornecedores);
 }
 
-
 void BuscaForne() {
     int buscaID, result;
     
@@ -1444,7 +1380,6 @@ void BuscaForne() {
     }
 }
 
-
 long int ConsultaForne(int id) {
     ArqFornecedores = fopen("Fornecedores.dat", "rb");
     if(ArqFornecedores == NULL) {
@@ -1460,7 +1395,6 @@ long int ConsultaForne(int id) {
     fclose(ArqFornecedores);
     return -1;
 }
-
 
 void MenuEdicaoForne() {
     int id, pos;
@@ -1517,7 +1451,6 @@ void MenuEdicaoForne() {
     } while(opcaoM != 0);
     pausa();
 }
-
 
 void EditarForne(int pos) {
     char escolha;
@@ -1671,7 +1604,6 @@ long int ExcluirForne(int id) {
         pausa();
         exit(1);
     }
-
 
     while(fread(&Forne, sizeof(Forne), 1, ArqFornecedores) == 1) {
         if(Forne.id == id) {
